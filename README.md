@@ -9,6 +9,18 @@ final SimpleFontMetrics metrics = SimpleFontMetrics.getInstance();
 final int width = metrics.widthOf("Hello World!");
 ```
 
+## MAVEN
+
+Add dependency to your pom.xml:
+
+```xml
+<dependency>
+    <groupId>org.javastack</groupId>
+    <artifactId>fontmetrics</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
 ## License
 
 All rights to Verdana are owned by Microsoft Corp.
