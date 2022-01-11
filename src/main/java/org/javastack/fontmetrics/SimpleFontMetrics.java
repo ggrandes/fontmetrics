@@ -54,18 +54,9 @@ public class SimpleFontMetrics {
 	}
 
 	private SimpleFontMetrics() {
-		try {
-			metrics = new SystemFontMetrics();
-		} catch (Throwable t) {
-			log.warn("SystemFontMetrics not available: " + t);
-		}
+		metrics = SystemFontMetrics.getDefaultInstance();
 		if (metrics == null) {
-			try {
-				metrics = IndexedFontMetrics.importFile(getClass().getResource(FILE_RESOURCE_INDEX_CACHE));
-			} catch (Exception e) {
-				log.error("IndexedFontMetrics not available: " + e);
-				throw new RuntimeException(e);
-			}
+			metrics = IndexedFontMetrics.getDefaultInstance();
 		}
 	}
 
@@ -131,7 +122,20 @@ public class SimpleFontMetrics {
 	}
 
 	public static class SystemFontMetrics implements FontMetricsHelper {
+		private static SystemFontMetrics INSTANCE = null;
 		private final FontMetrics metrics;
+
+		static {
+			try {
+				INSTANCE = new SystemFontMetrics();
+			} catch (Throwable t) {
+				log.warn("SystemFontMetrics not available: " + t);
+			}
+		}
+
+		public static SystemFontMetrics getDefaultInstance() {
+			return INSTANCE;
+		}
 
 		public SystemFontMetrics() {
 			final BufferedImage canvas = new BufferedImage(5, 5, BufferedImage.TYPE_INT_RGB);
@@ -226,8 +230,22 @@ public class SimpleFontMetrics {
 	}
 
 	public static class IndexedFontMetrics implements FontMetricsHelper {
+		private static IndexedFontMetrics INSTANCE = null;
 		private final int[] ranges;
 		private final byte[] widths;
+
+		static {
+			try {
+				INSTANCE = importFile(IndexedFontMetrics.class.getResource(FILE_RESOURCE_INDEX_CACHE));
+			} catch (Exception e) {
+				log.error("IndexedFontMetrics not available: " + e);
+				throw new RuntimeException(e);
+			}
+		}
+
+		public static IndexedFontMetrics getDefaultInstance() {
+			return INSTANCE;
+		}
 
 		private IndexedFontMetrics(final int[] ranges, final byte[] widths) {
 			this.ranges = ranges;
@@ -331,7 +349,7 @@ public class SimpleFontMetrics {
 		begin = System.currentTimeMillis();
 		final String TEST_FILE = new File("/tmp/", FILE_RESOURCE_INDEX_CACHE).getAbsolutePath();
 		System.out.println("TestFile=" + TEST_FILE);
-		final SystemFontMetrics sys = new SystemFontMetrics();
+		final SystemFontMetrics sys = SystemFontMetrics.getDefaultInstance();
 		sys.exportFile(loadRanges("short"), TEST_FILE);
 		final IndexedFontMetrics idx = IndexedFontMetrics.importFile(TEST_FILE);
 		System.out.println("Export/Import Time=" + (System.currentTimeMillis() - begin));
